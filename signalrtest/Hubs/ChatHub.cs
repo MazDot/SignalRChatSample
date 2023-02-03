@@ -71,7 +71,15 @@ namespace signalrtest.Hubs
             var userId = Context.User.FindFirstValue(ClaimTypes.NameIdentifier);
             var userName = _db.Users.FirstOrDefault(x => x.Id == userId);
 
-            await Clients.All.SendAsync("ReceiveAddRoomMessage", maxRoom, roomId, roomName, userId, userName);
+            await Clients.All.SendAsync("ReceiveAddRoomMessage", maxRoom, roomId, roomName, userId, userName.UserName);
+        }
+
+        public async Task SendDeleteRoomMessage(int deleted, string id ,string roomName)
+        {
+            var userId = Context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = _db.Users.FirstOrDefault(x => x.Id == userId);
+
+            await Clients.All.SendAsync("ReceiveDeleteRoomMessage", deleted, roomName, userId, userName.UserName);
         }
 
     }

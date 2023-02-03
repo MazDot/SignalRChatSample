@@ -13,6 +13,13 @@ connection.on("ReceiveUserDisconnected", function (userId, userName) {
 
 connection.on("ReceiveAddRoomMessage", function (maxRoom, roomId, roomName, userId, userName) {
     addMessage(`${userName} has created room ${roomName}`);
+    fillRoomDropDown();
+
+});
+
+connection.on("ReceiveDeleteRoomMessage", function (deleted, roomName, userId, userName) {
+    addMessage(`${userName} has deleted room ${roomName}`);
+    fillRoomDropDown();
 
 });
 
@@ -48,6 +55,43 @@ function addNewRoom(maxRoom) {
     })
 }
 
+function deleteRoom() {
+    let ddlDelRoom = document.getElementById('ddlDelRoom');
+    var roomName = ddlDelRoom.options[ddlDelRoom.selectedIndex].text;
+
+    let text = `do you want to delete chat room ${roomName}?`;
+    if (confirm(text) == false) {
+        return;
+    }
+
+    if (roomName == null && roomName == '') {
+        return;
+    }
+
+    let roomId = ddlDelRoom.value;
+
+    /*POST*/
+    $.ajax({
+        url: `/ChatRooms/DeleteChatRoom/${roomId}`,
+        dataType: "json",
+        type: "DELETE",
+        contentType: 'application/json;',
+        async: true,
+        processData: false,
+        cache: false,
+        success: function (json) {
+            connection.invoke("SendDeleteRoomMessage", json.deleted, json.id, roomName);
+
+            fillRoomDropDown();
+
+        },
+        error: function (xhr) {
+            alert('error');
+
+        }
+    })
+}
+
 
 document.addEventListener('DOMContentLoaded', (event) => {
     fillRoomDropDown();
@@ -58,7 +102,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 function fillUserDropDown() {
 
-    $.getJISON('/ChatRooms/GetChatUser')
+    $.getJSON('/ChatRooms/GetChatUser')
             .done(function (json) {
 
                 var ddlSelUser = document.getElementById("ddlSelUser");
@@ -80,7 +124,7 @@ function fillUserDropDown() {
     .fail(function (jgxhr, textStatus, error) {
 
         var err = textStatus + ", " + error;
-        console.log("Request Failed: " + jgqxhr.detail);
+        console.log("Request Failed: " + jgxhr.detail);
     });
 }
 
@@ -112,7 +156,7 @@ function fillRoomDropDown() {
         .fail(function (jqxhr, textStatus, error) {
 
             var err = textStatus + ", " + error;
-            console.log("Request Failed: " + jgxhr.detail);
+            console.log("Request Failed: " + jqxhr.detail);
         });
 }
 

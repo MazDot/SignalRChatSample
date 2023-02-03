@@ -74,9 +74,12 @@ namespace signalrtest.Controllers
 
         // DELETE: api/ChatRooms/5
         [HttpDelete("{id}")]
-        [Route("/[controller]/DeleteChatRoom")]
+        [Route("/[controller]/DeleteChatRoom/{id}")]
         public async Task<IActionResult> DeleteChatRoom(int id)
         {
+            if (_context.ChatRoom == null)
+                return NotFound();
+
             var chatRoom = await _context.ChatRoom.FindAsync(id);
             if (chatRoom == null)
             {
@@ -86,7 +89,7 @@ namespace signalrtest.Controllers
             _context.ChatRoom.Remove(chatRoom);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new { deleted = id });
         }
 
         private bool ChatRoomExists(int id)
